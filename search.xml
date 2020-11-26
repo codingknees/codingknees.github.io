@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>grpcurl指南</title>
+    <url>/2020/11/26/grpcurl%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>基于protoreflect包实现的，gRPC服务访问，探查工具</p>
+<p>有3种指定gRPC服务schema的方式：</p>
+<a id="more"></a>
+<ul>
+<li><p>服务开启server reflection之后，直接指定服务地址</p>
+</li>
+<li><p>本地提供服务对应的proto源文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-proto value  &#x2F;&#x2F;指定proto源文件，可以指定多个</span><br><span class="line">-import-path value &#x2F;&#x2F;指定import依赖的查找路径，可以指定多个</span><br></pre></td></tr></table></figure></li>
+<li><p>本地提供服务对应的protoset文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-protoset value &#x2F;&#x2F;指定protoset，可以指定多个</span><br></pre></td></tr></table></figure>
+<p>protoset是描述服务信息的<code>google.protobuf.FileDescriptorSet</code>对象实例。它以二进制格式存储在protoset文件中。生成的方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">protoc --proto_path&#x3D;. \</span><br><span class="line">  --descriptor_set_out&#x3D;myservice.protoset \</span><br><span class="line">  --include_imports \</span><br><span class="line">  my&#x2F;custom&#x2F;server&#x2F;service.proto</span><br></pre></td></tr></table></figure>
+<p>在protoc编译过程中已经指定了import path，并且依赖的proto也都编译到了同一个protoset，因此通过这种方式指定schema无需另外指定import path。并且，不需要每次使用都进行proto解析，性能更好。在脚本多次调用时，使用这种方式更加合适。</p>
+</li>
+</ul>
+<ol>
+<li><p>服务访问<br>支持包括streaming method在内的所有类型的gRPC接口访问，支持TLS和plain-text方式访问。对于TLS方式，支持指定各种参数。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">grpcurl [-d &#39;&#39;] address method</span><br></pre></td></tr></table></figure>
+<p>其中address支持</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ip:port		&#x2F;&#x2F;ip+端口</span><br><span class="line">host:port &#x2F;&#x2F;主机名+端口</span><br><span class="line">ip:servicename &#x2F;&#x2F;ip+知名端口</span><br><span class="line">host:servicename &#x2F;&#x2F;主机名+知名端口</span><br><span class="line">-unix&#x3D;true &#x2F;a&#x2F;path&#x2F;to&#x2F;the&#x2F;domain&#x2F;socket  &#x2F;&#x2F;unix套接字</span><br></pre></td></tr></table></figure>
+<p>连接方式支持plaintext和TLS方式，TLS支持各种参数指定</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-plaintext  &#x2F;&#x2F;plaintext模式</span><br><span class="line">&#x2F;&#x2F;下面都是TLS方式的参数</span><br><span class="line">-insecure   &#x2F;&#x2F;跳过server certificate和domain verification</span><br><span class="line">-authority string &#x2F;&#x2F;指定 :authority头,和-servername参数一样，在TLS certificate时，替换server name参数。因此不能和-servername同时提供。推荐使用本参数</span><br><span class="line">-servername string &#x2F;&#x2F;指定TLS certificate时的server name参数</span><br><span class="line">-cacert string &#x2F;&#x2F;指定根证书</span><br><span class="line">-cert string   &#x2F;&#x2F;指定client certificate(public key)</span><br><span class="line">-key string    &#x2F;&#x2F;指定client private key</span><br></pre></td></tr></table></figure>
+<p>其中method必须是fully-qualified，即必须是service+method，格式可以是</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service&#x2F;method</span><br><span class="line">service.method</span><br></pre></td></tr></table></figure>
+<p>此外通过-d指定请求结构数据，-d选项必须在address 和 method前面。如果是空的请求，可以不需要-d选项。 <code>-d @</code> 指定从标准输入中读取请求数据，这个选项配合<code>jq</code>命令进行管道操作有奇效。</p>
+</li>
+<li><p>服务探查</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">grpcurl [address&#x2F;proto&#x2F;protoset] list [symbol]</span><br><span class="line">grpcurl [address&#x2F;proto&#x2F;protoset] describe [symbol]</span><br></pre></td></tr></table></figure>
+<p>这里的symbol都必须是fully-qualified名字。list可以带service；describe可以带service，enum，message。<br>list 不带symbol时，输出所有的service；带service时，输出该service的所有method；<br>describe 不带symbol时，也是输出所有的service；带symbol时，输出该symbol的详细信息。</p>
+</li>
+<li><p>其他选项</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-H value   &#x2F;&#x2F;指定额外的header, 格式 &#39;name:value&#39;。可以多个。</span><br><span class="line">-reflect-header value  &#x2F;&#x2F;指定服务探查时额外的header</span><br><span class="line">-rpc-header value  &#x2F;&#x2F;指定rpc访问时额外的header</span><br><span class="line">-expand-headers   &#x2F;&#x2F;上述3个选项中的$&#123;NAME&#125;格式的header用环境变量进行展开，目的是避免在命令行中暴露密码等敏感信息</span><br><span class="line"></span><br><span class="line">-connect-timeout float   &#x2F;&#x2F;指定连接超时时间, 默认10s</span><br><span class="line">-keepalive-time float      &#x2F;&#x2F;连接空闲时，心跳请求发送间隔时间</span><br><span class="line">-max-time float    &#x2F;&#x2F;单次请求最大处理时间，可以避免grpcurl因为复杂请求或者网络状况差或者错误的stream使用方式而挂住</span><br><span class="line">-max-msg-sz int    &#x2F;&#x2F;单个rsp的最大长度，默认4,194,304(即4M))</span><br><span class="line"></span><br><span class="line">-format string   &#x2F;&#x2F;指定请求数据格式，可选json和text，默认是json</span><br><span class="line">-format-error    &#x2F;&#x2F;发生错误时，用-format指定的格式打印错误</span><br><span class="line"></span><br><span class="line">-allow-unknown-fields  &#x2F;&#x2F;用json格式解析req时，忽略未知的字段</span><br><span class="line">-emit-defaults    &#x2F;&#x2F;用json解析rsp时，忽略默认值</span><br><span class="line">-msg-template    &#x2F;&#x2F;describe子命令探查message时，打印一个message的模板，方便复制使用</span><br><span class="line">-protoset-out string      &#x2F;&#x2F;list或者describe时，把protoset写到指定的文件中</span><br><span class="line">-use-reflection     &#x2F;&#x2F;当指定-proto或者--protoset时，默认是不通过服务reflection进行探查的，通过这个选项可以同时打开本地模式和服务reflection模式</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>grpc,protobuf</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo+github搭建个人博客</title>
+    <url>/2020/11/26/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>最近工作中学的新东西挺多的，重开博客记录一下。博客采用hexo+github page的方式搭建。<br>主要参考这篇<a href="https://zhuanlan.zhihu.com/p/26625249">文章</a>，进行操作。<br>用的是这个<a href="https://github.com/wzpan/hexo-theme-freemind">主题</a>的readable配色方案。<br>支持搜索，留言功能，但是顶部的分类和标签按钮不可用。对布局和颜色也不是特别满意，后面有需要再折腾这些吧。</p>
+<p>整个过程还算是比较顺利，下面简单记录一下：</p>
+<a id="more"></a>
+<ol>
+<li>配置hexo的_config.yaml和theme的_config.yaml，由于我还深度改了一下theme的一些文案，<del>就单独fork了这个theme的仓库，然后用的是我fork的这个仓库</del>。直接将该仓库添加到当前项目。</li>
+<li>hexo g 的原理似乎是把source代码转换之后，放到public目录中。hexo d则是把public的代码复制到.deploy_git目录中，然后在推到xx.github.io仓库，而且似乎是push -f ??</li>
+<li>参考<a href="https://www.zhihu.com/question/21193762/answer/79109280">这里的做法</a>将source代码push到该仓库的hexo分支，以期望对source进行管理。</li>
+<li>测试，在另一台电脑上clone仓库，checkout到hexo分支，执行npm install之后，就可以用hexo进行管理了。</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+</search>
