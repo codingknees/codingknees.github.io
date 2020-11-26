@@ -66,4 +66,17 @@
         <tag>grpc,protobuf</tag>
       </tags>
   </entry>
+  <entry>
+    <title></title>
+    <url>/2020/11/26/protobuf%20golang%E7%9A%84%E7%89%88%E6%9C%AC%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="protobuf-golang的版本历史问题"><a href="#protobuf-golang的版本历史问题" class="headerlink" title="protobuf golang的版本历史问题"></a>protobuf golang的版本历史问题</h2><p>v1版<br>模块：github.com/golang/protobuf<br>仓库地址：<a href="https://github.com/golang/protobuf">https://github.com/golang/protobuf</a><br>protoc-gen-go包：github.com/golang/protobuf/protoc-gen-go<br>首次release时间：2010.4.20<br>依赖：从1.4.0开始，依赖v2实现</p>
+<p>v2版<br>模块：google.golang.org/protobuf<br>仓库地址：<a href="https://github.com/protocolbuffers/protobuf-go">https://github.com/protocolbuffers/protobuf-go</a><br>protoc-gen-go包：google.golang.org/protobuf/cmd/protoc-gen-go<br>首次release时间：2020.3.2<br>依赖：从go.mod看对v1有依赖，但是只在文件internal/weakdeps/weakdeps.go找到如下依赖代码:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import _ &quot;github.com&#x2F;golang&#x2F;protobuf&#x2F;proto&quot;</span><br></pre></td></tr></table></figure>
+<p>没搞懂这种循环依赖为什么没问题？</p>
+<p>根据<a href="https://blog.golang.org/protobuf-apiv2">官方说明</a>，v2具有更好的性能，更清晰的接口以及对反射的一手支持。<br>v1从1.4.0开始，底层其实是对v2的封装，提供v1的接口。<br>v2使用不同的包名，这样兼顾了性能上的收益和使用上的正确性，可以让开发者进行平稳过渡。<br>但是，两个版本由于原理不同，他们各自工具生成的.pb.go只能搭配自己的版本的代码使用。</p>
+<p>对于为何不遵循语义化版本的惯例，官方并没有直接说出来。只是说明，v1版的版本号一定不会升到1.20.0，所以可以区分v1和v2。但是又声明会对v1版提供无限期的支持。<br>这里感觉就有点矛盾了？无限期支持，怎么保证不升到1.20.0？</p>
+<p>参考文档<br>v1：<br><a href="https://blog.golang.org/protobuf">https://blog.golang.org/protobuf</a><br><a href="https://github.com/golang/protobuf/blob/master/go.mod">https://github.com/golang/protobuf/blob/master/go.mod</a></p>
+<p>v2：<br><a href="https://blog.golang.org/protobuf-apiv2">https://blog.golang.org/protobuf-apiv2</a><br><a href="https://github.com/protocolbuffers/protobuf-go/blob/master/go.mod">https://github.com/protocolbuffers/protobuf-go/blob/master/go.mod</a></p>
+]]></content>
+  </entry>
 </search>
