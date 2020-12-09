@@ -218,12 +218,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -255,6 +255,79 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://codingknees.github.io/2020/12/09/%E7%90%86%E8%A7%A3gitsubmodule/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="codingknees">
+      <meta itemprop="description" content="codingknees' blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TecBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/09/%E7%90%86%E8%A7%A3gitsubmodule/" class="post-title-link" itemprop="url">理解gitsubmodule</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2020-12-09 21:27:09 / 修改时间：22:51:26" itemprop="dateCreated datePublished" datetime="2020-12-09T21:27:09+08:00">2020-12-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>git submodule最好的理解，就是指针。主仓库中，某个特定的目录，在版本管理模型中，不被标识为目录，而是一个指向其他仓库某个具体提交(commit-ish)的指针。<br>因此，对于子仓库目录而言，git不关心里面的具体内容，而只关心他的“指向”，即commit-ish。目录在，则子仓库在；目录被删除，则认为不再引用该子仓库。而目录在，不管里面的内容有还是没有（有，且被修改是另外一回事），都认为对子仓库的引用不变。这里之所以说这里多，是因为这对子仓库添加，拉取，删除的理解非常重要。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/09/%E7%90%86%E8%A7%A3gitsubmodule/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
